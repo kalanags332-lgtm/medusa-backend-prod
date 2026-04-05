@@ -1,22 +1,8 @@
 FROM node:20-alpine
-
-# Set working directory
 WORKDIR /app
-
-# Install native dependencies needed for Medusa
 RUN apk add --no-cache python3 make g++ 
-
-# Copy package files
 COPY package*.json ./
-
-# Install all dependencies (including devDependencies needed for build)
-RUN npm ci --include=dev
-
-# Copy project files
+RUN npm i -g yarn && yarn install --network-timeout 1000000
 COPY . .
-
-# Build the Medusa project
-RUN npm run build
-
-# Start the Medusa backend
-CMD ["npm", "run", "start"]
+RUN yarn build
+CMD ["yarn", "start"]
