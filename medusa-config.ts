@@ -5,6 +5,7 @@ loadEnv(process.env.NODE_ENV || 'development', process.cwd())
 module.exports = defineConfig({
   admin: {
     disable: false,
+    backendUrl: process.env.MEDUSA_BACKEND_URL || process.env.RAILWAY_PUBLIC_DOMAIN || "https://my-medusa-clothstore-backend-production.up.railway.app",
   },
   projectConfig: {
     databaseUrl: process.env.DATABASE_URL,
