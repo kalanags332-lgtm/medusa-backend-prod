@@ -2,20 +2,21 @@ FROM node:20
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y python3 make g++ 
+RUN apt-get update && apt-get install -y python3 make g++
 
-COPY package.json yarn.lock* ./
+# Copy package files
+COPY package.json package-lock.json ./
 
-RUN yarn install --network-timeout 1000000
+# Use npm ci for a clean, reproducible install
+RUN npm ci
 
 COPY . .
 
 # Set NODE_ENV to production during build
 ENV NODE_ENV=production
 
-# Run build and check for admin directory
-RUN yarn build
+# Build the backend (admin is disabled so this is fast)
+RUN npm run build
 
-
-CMD npx medusa db:migrate && yarn start
-
+# Run migrations then start the server
+CMD npx medusa db:migrate && npm start
