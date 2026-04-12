@@ -1,8 +1,8 @@
-FROM node:20-alpine
+FROM node:20
 
 WORKDIR /app
 
-RUN apk add --no-cache python3 make g++ 
+RUN apt-get update && apt-get install -y python3 make g++ 
 
 COPY package.json yarn.lock* ./
 
@@ -14,7 +14,7 @@ COPY . .
 ENV NODE_ENV=production
 
 # Run build and check for admin directory
-RUN yarn build && ls -la .medusa/server/admin || echo "Admin build not found"
+RUN yarn build
 
 CMD npx medusa db:migrate && yarn start
 
