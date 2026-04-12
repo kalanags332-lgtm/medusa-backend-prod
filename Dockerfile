@@ -1,22 +1,13 @@
-FROM node:20
+FROM node:20-slim
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y python3 make g++
+# Copy pre-built output and package files
+COPY .medusa/server/package.json .medusa/server/package-lock.json* ./
+COPY .medusa/server ./
 
-# Copy package files
-COPY package.json package-lock.json ./
+# Install only production dependencies (fast, no dev deps)
+RUN npm install --omit=dev --no-audit --no-fund
 
-# Use npm ci for a clean, reproducible install
-RUN npm ci
-
-COPY . .
-
-# Set NODE_ENV to production during build
-ENV NODE_ENV=production
-
-# Build the backend (admin is disabled so this is fast)
-RUN npm run build
-
-# Run migrations then start the server
-CMD npx medusa db:migrate && npm start
+# Run migrations then start
+CMD npx medusa db:migrate && npx medusa start
