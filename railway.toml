@@ -1,3 +1,9 @@
 [build]
 builder = "dockerfile"
 dockerfilePath = "Dockerfile"
+
+[deploy]
+startCommand = "npx medusa db:migrate && npx medusa start"
+
+[[services]]
+internalPort = 9000
