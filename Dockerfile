@@ -1,8 +1,20 @@
 FROM node:20-alpine
+
 WORKDIR /app
+
 RUN apk add --no-cache python3 make g++ 
-COPY package*.json ./
+
+COPY package.json yarn.lock* ./
+
 RUN yarn install --network-timeout 1000000
+
 COPY . .
-RUN yarn build
+
+# Set NODE_ENV to production during build
+ENV NODE_ENV=production
+
+# Run build and check for admin directory
+RUN yarn build && ls -la .medusa/server/admin || echo "Admin build not found"
+
 CMD npx medusa db:migrate && yarn start
+

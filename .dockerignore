@@ -1,0 +1,8 @@
+node_modules
+.medusa
+.cache
+.git
+dist
+build
+.env
+.DS_Store
