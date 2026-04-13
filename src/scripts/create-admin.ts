@@ -3,13 +3,16 @@ import { Modules } from "@medusajs/framework/utils";
 import scrypt from "scrypt-kdf";
 
 export default async function createAdminUser({ container }: ExecArgs) {
+  const logger = container.resolve("logger");
   const authModuleService = container.resolve(Modules.AUTH);
   const userModuleService = container.resolve(Modules.USER);
 
   const email = "kalanags331@gmail.com";
   const password = "helloworld123";
 
-  console.log(`Creating admin user: ${email}`);
+  logger.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+  logger.info(`STARTING ADMIN CREATION SCRIPT FOR: ${email}`);
+  logger.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
   try {
     // Check if user already exists
