@@ -13,7 +13,7 @@
     "medusa"
   ],
   "scripts": {
-    "build": "medusa build && node -e \"require('fs').cpSync('.medusa/server/public', 'build/public', {recursive: true})\"",
+    "build": "echo \"Skipping server build to bypass Railway OOM limit. Using pre-compiled files.\"",
     "seed": "medusa exec ./src/scripts/seed.ts",
     "start": "medusa start",
     "dev": "medusa develop",
