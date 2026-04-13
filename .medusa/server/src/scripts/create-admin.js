@@ -17,79 +17,67 @@ async function createAdminUser({ container }) {
   const password = "helloworld123";
 
   logger.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-  logger.info(`FINAL SYNC FOR ADMIN USER: ${email}`);
+  logger.info(`🔥 DESTRUCTIVE SYNC FOR ADMIN USER: ${email}`);
   logger.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
   try {
-    // 1. Get or Create User
-    let user;
-    const existingUsers = await userModuleService.listUsers({ email });
-    if (existingUsers.length > 0) {
-      user = existingUsers[0];
-      logger.info(`User record exists: ${user.id}`);
-    } else {
-      [user] = await userModuleService.createUsers([
-        { email, first_name: "Admin", last_name: "User" },
-      ]);
-      logger.info(`Created user record: ${user.id}`);
-    }
-
-    // 2. Hash Password
-    const passwordHash = await scrypt_kdf_1.default.kdf(password, { logN: 15, r: 8, p: 1 });
-    const passwordHashBase64 = passwordHash.toString("base64");
-
-    // 3. Find existing Auth Identity using Query Graph (safe)
+    // 1. DELETE EVERYTHING RELATED TO THIS EMAIL FIRST (CLEAN SLATE)
+    
+    // Find all identities for this email
     const { data: identities } = await query.graph({
       entity: "auth_identity",
       fields: ["id"],
       filters: { 
         provider_identities: { 
-          entity_id: [email],
-          provider: ["emailpass"]
+          entity_id: [email]
         } 
       }
     });
 
-    let authIdentity;
     if (identities.length > 0) {
-      authIdentity = identities[0];
-      logger.info(`Updating existing auth identity: ${authIdentity.id}`);
-      await authModuleService.updateAuthIdentities([
-        {
-          id: authIdentity.id,
-          provider_metadata: { password: passwordHashBase64 },
-        }
-      ]);
-    } else {
-      [authIdentity] = await authModuleService.createAuthIdentities([
-        {
-          provider: "emailpass",
-          entity_id: email,
-          provider_metadata: { password: passwordHashBase64 },
-          app_metadata: { user_id: user.id },
-        },
-      ]);
-      logger.info(`Created new auth identity: ${authIdentity.id}`);
+      logger.info(`Removing ${identities.length} old auth identities...`);
+      await authModuleService.deleteAuthIdentities(identities.map(i => i.id));
     }
 
-    // 4. Force valid link
-    try {
-      await link.create({
-        [utils_1.Modules.AUTH]: {
-          auth_identity_id: authIdentity.id,
-        },
-        [utils_1.Modules.USER]: {
-          user_id: user.id,
-        },
-      });
-      logger.info("Link created successfully.");
-    } catch (e) {
-      logger.info("Link already exists or error during linking (non-fatal).");
+    // Find and delete the user
+    const existingUsers = await userModuleService.listUsers({ email });
+    if (existingUsers.length > 0) {
+      logger.info(`Removing existing user: ${existingUsers[0].id}`);
+      await userModuleService.deleteUsers(existingUsers.map(u => u.id));
     }
 
-    logger.info(`✅ Admin user ${email} is 100% ready!`);
+    // 2. CREATE FRESH
+    const [user] = await userModuleService.createUsers([
+      { email, first_name: "Admin", last_name: "User" },
+    ]);
+    logger.info(`Created fresh user record: ${user.id}`);
+
+    const passwordHash = await scrypt_kdf_1.default.kdf(password, { logN: 15, r: 8, p: 1 });
+    const passwordHashBase64 = passwordHash.toString("base64");
+
+    const [authIdentity] = await authModuleService.createAuthIdentities([
+      {
+        provider: "emailpass",
+        entity_id: email,
+        provider_metadata: { password: passwordHashBase64 },
+        app_metadata: { user_id: user.id },
+      },
+    ]);
+    logger.info(`Created fresh auth identity: ${authIdentity.id}`);
+
+    // 3. LINK THEM
+    await link.create({
+      [utils_1.Modules.AUTH]: {
+        auth_identity_id: authIdentity.id,
+      },
+      [utils_1.Modules.USER]: {
+        user_id: user.id,
+      },
+    });
+
+    logger.info(`✅ Admin user ${email} is FRESHLY SYNCED AND READY!`);
   } catch (err) {
-    logger.error(`❌ Admin sync failed: ${err.message}`);
+    logger.error(`❌ Destructive sync failed: ${err.message}`);
   }
 }
 
