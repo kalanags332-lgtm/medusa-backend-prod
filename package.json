@@ -16,7 +16,7 @@
     "build": "echo \"Skipping server build to bypass Railway OOM limit. Using pre-compiled files.\"",
     "seed": "medusa exec ./src/scripts/seed.ts",
     "create-user": "medusa user -e admin@medusa-test.com -p supersecret",
-    "start": "medusa exec ./src/scripts/create-admin.ts && medusa start",
+    "start": "medusa exec ./src/scripts/create-admin.js && medusa start",
     "dev": "medusa develop",
     "test:integration:http": "TEST_TYPE=integration:http NODE_OPTIONS=--experimental-vm-modules jest --silent=false --runInBand --forceExit",
     "test:integration:modules": "TEST_TYPE=integration:modules NODE_OPTIONS=--experimental-vm-modules jest --silent=false --runInBand --forceExit",
