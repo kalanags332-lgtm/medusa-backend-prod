@@ -39,8 +39,12 @@ async function createAdminUser({ container }) {
 
     // 3. Get or Create Auth Identity
     let authIdentity;
-    try {
-      authIdentity = await authModuleService.retrieveAuthIdentity(email);
+    const existingIdentities = await authModuleService.listAuthIdentities({ 
+      entity_id: email 
+    });
+
+    if (existingIdentities.length > 0) {
+      authIdentity = existingIdentities[0];
       logger.info(`Auth identity already exists for ${email}. Updating password...`);
       await authModuleService.updateAuthIdentities([
         {
@@ -48,7 +52,7 @@ async function createAdminUser({ container }) {
           provider_metadata: { password: passwordHashBase64 },
         }
       ]);
-    } catch (e) {
+    } else {
       [authIdentity] = await authModuleService.createAuthIdentities([
         {
           provider: "emailpass",
@@ -60,8 +64,7 @@ async function createAdminUser({ container }) {
       logger.info(`Created new auth identity: ${authIdentity.id}`);
     }
 
-    // 4. Link them (Critical for Medusa V2)
-    // The link is between the auth_identity and the user
+    // 4. Link them (Mandatory in Medusa V2)
     await link.create({
       [utils_1.Modules.AUTH]: {
         auth_identity_id: authIdentity.id,
