@@ -3,4 +3,4 @@ builder = "dockerfile"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-startCommand = "npx medusa db:migrate && npm run start"
+startCommand = "NODE_OPTIONS=--max_old_space_size=400 npm run start"
