@@ -36,6 +36,10 @@
 
 This starter is compatible with versions >= 2 of `@medusajs/medusa`. 
 
+## 🚀 Deployment
+
+For detailed information on how this project is configured for **Railway** and tips for troubleshooting common deployment issues, see the **[Deployment & Troubleshooting Guide](./DEPLOYMENT_DOCS.md)**.
+
 ## Getting Started
 
 Visit the [Quickstart Guide](https://docs.medusajs.com/learn/installation) to set up a server.
