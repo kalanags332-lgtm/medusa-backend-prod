@@ -14,4 +14,4 @@ ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 
 # Run migrations then start using the local package script
-CMD npx medusa db:migrate && npm run start
+CMD npx medusa db:migrate && npm run create-user || true && npm run start
